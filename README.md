@@ -2,9 +2,9 @@
 You: Wow! I want to use this to encrypt everything, everywhere, always. 
 Me: You can't. It's ok2cry.
 
-This project is about how to use simple, disposable PKI without the tears.
+This project is about how to use simple, disposable PKI without the tears. And without ~~bitcon~~ ~~bitcoin~~ bitcon.
 
-The fundamental idea is that crypto is everywhere and that means you can use it liberally and disposably
+The fundamental idea is that cryptography is everywhere and that means you can use it liberally and disposably
 - your programming language and OS have cryptographic tools
 - mobile devices have cryptographic tools
 - embedded devices, even very small and cheap kits, have cryptographic chips and tools
@@ -16,11 +16,11 @@ The fundamental idea is that crypto is everywhere and that means you can use it 
 - Protect data coming from a server to a client
 - Protect data coming from a client to a client (peers) 
 
-## Hold on there ... we've got TLS
+### Hold on there ... we've got TLS so I'm out!!
 Yes, yes you do. And that's great. And in many cases it's good enough. You can move on.
 
-## Er, OK ... just before I leave, quick follow up. When isn't TLS good enough.
-A few examples
+### Er, OK ... just before I leave, quick follow up. When isn't TLS good enough?
+No worries. Here are a few examples:
 - you want to protect data after it exits TLS but before it hits your service. 
   - you can't risk having that data written into logs
   - you don't want anyone except the person entering the data and your service accessing the data.
