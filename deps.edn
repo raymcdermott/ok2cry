@@ -1,0 +1,7 @@
+; This file is only here to assist with editor integration, specifically Cursive on IntelliJ IDEA
+
+; nbb DOES NOT USE THIS FILE - deps are built in (like promesa) or added via npm => package.json
+
+{:paths ["src" "test"]
+ :deps  {org.clojure/clojurescript {:mvn/version "1.11.51"}
+         funcool/promesa           {:mvn/version "8.0.446"}}}
