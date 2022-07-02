@@ -1,14 +1,13 @@
 (ns io.ok2cry.cry
   (:require
-    #?@(:nbb [["crypto" :as crypto]]
-        :cljs [])
-    #?@(:nbb [["buffer" :as buffer]]
+    #?@(:org.babashka/nbb [["crypto" :as crypto]
+                           ["buffer" :as buffer]]
         :cljs [])
     [clojure.string :as string]
     [clojure.edn :as edn]
     [promesa.core :as p]))
 
-#?(:nbb
+#?(:org.babashka/nbb
    (def subtle (.. crypto -webcrypto -subtle))
    :cljs
    (def subtle js/crypto.subtle))
@@ -81,7 +80,7 @@
 
 (defn to-hex
   [^js/Uint8Array array]
-  #?(:nbb
+  #?(:org.babashka/nbb
      (.toString (buffer/Buffer.from array) "hex")
      :cljs
      (->> (js/Array.from array)
@@ -94,7 +93,7 @@
 
 (defn from-base64
   [base64]
-  #?(:nbb
+  #?(:org.babashka/nbb
      (js/Uint8Array.from (buffer/Buffer.from base64 "base64"))
      :cljs
      (let [decoded (.toString (js/Buffer.from base64 "base64") "binary")
