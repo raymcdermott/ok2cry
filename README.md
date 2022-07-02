@@ -42,3 +42,44 @@ ok2cry is a way to use cryptography for just one message at a time. Nothing is t
 ### Isn't cryptography horribly inefficient? Are you burning the planet too?
 Excuse me, no. Absolutely not. This is not bitcon mining. It's very efficient to produce keys. The most commonly used CPUs (mobile, PC) have direct support for cryptography. Even tiny IOT style embedded CPUs / SOCs have cryptographic support eg the [ESP32](https://en.wikipedia.org/wiki/ESP32#Features). You can buy one for less than $10.
 
+## OK, let's see how it works
+Here are two examples:
+- client: a browser-based Single Page Application can give the server a key so that it, and only it, can ever read a message encrypted with the key by the server.
+- server: a server gives a public key so that it, and only it, can ever read a message encrypted with the key by the client.
+
+### Client produces temporary key
+```mermaid
+sequenceDiagram
+User->>SPA: Clicks form "Send" button
+SPA->>SPA: Produce temporary key pair
+SPA->>Service Instance: Make data request, includes public key
+Service Instance->> X-Y-Z: Do X-Y-Z to get data
+Service Instance->>Service Instance: Encrypt data using public key
+Service Instance->>SPA: Send encrypted data
+SPA->>SPA: Decrypt using private key
+SPA->>SPA: Destroy temporary key pair
+SPA->>User: Show decrypted data
+```
+
+More examples and documentation notes are in the [Client key documentation](docs/client-key.md).
+
+### Server produces temporary key
+```mermaid
+sequenceDiagram
+User->>SPA: Clicks form "Send" button
+SPA->>Service Instance X: Request key (GET)
+Service Instance X->>Service Instance X: Produce temporary key pair            
+Service Instance X->>Storage: Save key, expires in N seconds            
+Service Instance X->>SPA: Send public key
+SPA->>SPA: Encrypt secure data with public key
+SPA->>Service Instance Y: Send encrypted data (POST)
+Storage->>Service Instance Y: Retrieve key
+Service Instance Y->>Service Instance Y: Decrypt message using private key
+Service Instance Y->> X-Y-Z: Do X-Y-Z
+Service Instance Y->>SPA: Success message
+SPA->>User: Confirm card creation
+SPA->>SPA: Destroy public key
+Time->>Storage: Key deleted after N seconds
+```
+
+More examples and documentation notes are in the [Server key documentation](docs/server-key.md).
