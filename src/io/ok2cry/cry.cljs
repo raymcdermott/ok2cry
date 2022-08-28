@@ -2,10 +2,11 @@
   (:require
     #?@(:org.babashka/nbb [["crypto" :as crypto]
                            ["buffer" :as buffer]]
-        :cljs [])
+        :cljs             [])
     [clojure.string :as string]
     [clojure.edn :as edn]
-    [promesa.core :as p]))
+    [promesa.core :as p]
+    [clojure.string :as string]))
 
 #?(:org.babashka/nbb
    (def subtle (.. crypto -webcrypto -subtle))
@@ -87,10 +88,6 @@
           (map #(.padStart (.toString % 16) 2 "0"))
           (apply str))))
 
-#_(defn from-hex
-  [hex]
-  (js/Uint8Array.from (buffer/Buffer.from hex "hex")))
-
 (defn from-base64
   [base64]
   #?(:org.babashka/nbb
@@ -115,6 +112,7 @@
 (defn import-signing-key
   [key-str]
   (let [key-arr (from-base64 key-str)]
+    (println :has-array)
     (.importKey subtle
                 "spki"
                 key-arr

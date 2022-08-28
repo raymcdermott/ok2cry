@@ -15,7 +15,8 @@
 
 
 (defn ->encrypted-response
-  [{:keys [signing-key encryption-key signature signed-property request-data]}]
+  [{:keys [signing-key encryption-key signature signed-property request-data] :as x}]
+  (println :x x)
   (p/let [signing-key'    (cry/import-signing-key signing-key)
           encryption-key' (cry/import-crypto-key encryption-key)
           signature'      (cry/hex->array-buffer signature)
@@ -30,19 +31,21 @@
 (defn event->body-data
   [event]
   (let [clj-event (js->clj event :keywordize-keys true)]
-    (-> clj-event (get :body) (js/JSON.parse) (js->clj :keywordize-keys true))))
+    (-> clj-event :body (js/JSON.parse) (js->clj :keywordize-keys true))))
 
 
 (defn handler
-  [event _ctx]
-  (js/console.log event)
-  (p/let [response (time (p/-> event
-                               (event->body-data)
-                               (->encrypted-response)))]
-    (if response
-      (clj->js {:statusCode 200
-                :body       (js/JSON.stringify (clj->js response))})
-      (clj->js {:statusCode 500}))))
+  ([event]
+   (handler event {}))
+  ([event _ctx]
+   (js/console.log event)
+   (p/let [response (time (p/-> event
+                                (event->body-data)
+                                (->encrypted-response)))]
+     (if response
+       (clj->js {:statusCode 200
+                 :body       (js/JSON.stringify (clj->js response))})
+       (clj->js {:statusCode 500})))))
 
 
 (def fake-json
@@ -54,7 +57,7 @@
 (def fake-api-request
   (clj->js (assoc {:requestContext {:httpMethod "POST"}} :body (js/JSON.stringify (clj->js fake-json)))))
 
-(p/let [x (handler fake-api-request "0")]
+#_(p/let [x (handler fake-api-request "0")]
   (println x))
 
 

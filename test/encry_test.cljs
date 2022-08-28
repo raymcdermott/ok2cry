@@ -2,20 +2,15 @@
   (:require
     [cljs.test :as t :refer [async deftest is testing]]
     [common-data]
-    [encry]
+    [lambda.encry :as encry]
     [promesa.core :as p]))
 
 
-(deftest card-pin-access
-  (testing "that we can obtain the card PIN"
+(deftest encryption-keys-from-client
+  (testing "that we can get data encrypted with a client public key"
     (async done
-           (-> (p/let [{:keys [id]} (create/create-card common-data/card-account common-data/sample-data)
-                       {:keys [activated]} (activate/call-modulr-api id)
-                       {:keys [body]} (pin/call-modulr-api id)
-                       _clean-up (and id (aws-secrets/delete-management-token id))]
-                 (is (true? activated))
-                 (is (seq (:pin body)))
-                 (is (number? (parse-long (:pin body)))))
+           (-> (p/let [response (encry/handler common-data/fake-api-request)]
+                 (is (= 1 response)))
                (p/finally done)))))
 
 

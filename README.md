@@ -101,3 +101,16 @@ Time->>Storage: Key deleted after N seconds
 ```
 
 More examples and documentation notes are in the [Server key documentation](docs/server-key.md).
+
+
+What contexts work well?
+
+Secrecy
+
+Confidentiality
+
+Proofs
+
+Identity
+
+
