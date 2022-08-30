@@ -3,8 +3,10 @@
             ["fs" :as fs]
             [lambda.decry :as decry]
             [lambda.encry :as encry]
+            [lambda.simple :as simple]
             ["@tinyhttp/logger" :as logger]
             ["path" :as path]
+            [promesa.core :as p]
             ["milliparsec" :as milliparsec]))
 
 (def app (app/App.))
@@ -30,16 +32,16 @@
 
 (defn call-handler
   [req res]
-  ;; Todo use cond to route based on (.-path req)
-  (println :path (.-path req) :api-name (subs (.-path req) (count "/api/")))
-  (let [api (keyword (subs (.-path req) (count "/api/")))
-        request-body (req->api-gateway-data req)
-        result (condp = api
-                 :encrypt (encry/handler request-body nil)
-                 :decrypt (decry/handler request-body nil))]
-    (-> res
-        (.status 200)
-        (.send result))))
+  (p/let [api (keyword (subs (.-path req) (count "/api/")))
+          request-body (req->api-gateway-data req)
+          result (condp = api
+                   :simple (simple/handler request-body nil)
+                   :encrypt (encry/handler request-body nil)
+                   :decrypt (decry/handler request-body nil))]
+    (js/console.log "result" result)
+         (-> res
+             (.status 200)
+             (.send result))))
 
 (defn -main
   [_]

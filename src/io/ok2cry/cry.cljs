@@ -112,7 +112,6 @@
 (defn import-signing-key
   [key-str]
   (let [key-arr (from-base64 key-str)]
-    (println :has-array)
     (.importKey subtle
                 "spki"
                 key-arr

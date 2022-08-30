@@ -2,6 +2,7 @@
   "Encrypt data using a public key from the other party"
   (:require
     [io.ok2cry.cry :as cry]
+    [cljs-bean.core :as cb]
     [nbb.core :refer [time]]
     [promesa.core :as p]))
 
@@ -15,31 +16,37 @@
 
 
 (defn ->encrypted-response
-  [{:keys [signing-key encryption-key signature signed-property request-data] :as x}]
-  (println :x x)
-  (p/let [signing-key' (cry/import-signing-key signing-key)
+  [{:keys [signing-key encryption-key signature signed-property request-data]}]
+  (p/let [_ (println 0)
+          signing-key' (cry/import-signing-key signing-key)
+          _ (println 1)
           encryption-key' (cry/import-crypto-key encryption-key)
+          _ (println 2)
           signature' (cry/hex->array-buffer signature)
+          _ (println 3)
           request-data' (cry/hex-string->edn request-data)
+          _ (println 4)
           signed-data (request-data' (keyword signed-property))
+          _ (println 5)
           verified? (cry/verify signing-key' signature' (cry/string->encoded-data signed-data))
+          _ (println 6)
           encrypted-data (when verified? (obtain-secret-data encryption-key'))]
+    (println :encrypted-data encrypted-data)
     (when encrypted-data
       {:pin (cry/array-buffer->hex encrypted-data)})))
 
 
 (defn event->body-data
   [event]
-  (let [clj-event (js->clj event :keywordize-keys true)]
-    (-> clj-event :body (js/JSON.parse) (js->clj :keywordize-keys true))))
+  (some-> event cb/->clj :body js/JSON.parse cb/->clj))
 
 
 (defn handler
   [event _ctx]
-  (js/console.log event)
-  (p/let [response (time (p/-> event
-                               (event->body-data)
-                               (->encrypted-response)))]
+  (p/let [response (p/-> event
+                         (event->body-data)
+                         (->encrypted-response))]
+    (js/console.log "response" response)
     (if response
       (clj->js {:statusCode 200
                 :body       (js/JSON.stringify (clj->js response))})
