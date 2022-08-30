@@ -17,13 +17,13 @@
 (defn ->encrypted-response
   [{:keys [signing-key encryption-key signature signed-property request-data] :as x}]
   (println :x x)
-  (p/let [signing-key'    (cry/import-signing-key signing-key)
+  (p/let [signing-key' (cry/import-signing-key signing-key)
           encryption-key' (cry/import-crypto-key encryption-key)
-          signature'      (cry/hex->array-buffer signature)
-          request-data'   (cry/hex-string->edn request-data)
-          signed-data     (request-data' (keyword signed-property))
-          verified?       (cry/verify signing-key' signature' (cry/string->encoded-data signed-data))
-          encrypted-data  (when verified? (obtain-secret-data encryption-key'))]
+          signature' (cry/hex->array-buffer signature)
+          request-data' (cry/hex-string->edn request-data)
+          signed-data (request-data' (keyword signed-property))
+          verified? (cry/verify signing-key' signature' (cry/string->encoded-data signed-data))
+          encrypted-data (when verified? (obtain-secret-data encryption-key'))]
     (when encrypted-data
       {:pin (cry/array-buffer->hex encrypted-data)})))
 
@@ -35,17 +35,15 @@
 
 
 (defn handler
-  ([event]
-   (handler event {}))
-  ([event _ctx]
-   (js/console.log event)
-   (p/let [response (time (p/-> event
-                                (event->body-data)
-                                (->encrypted-response)))]
-     (if response
-       (clj->js {:statusCode 200
-                 :body       (js/JSON.stringify (clj->js response))})
-       (clj->js {:statusCode 500})))))
+  [event _ctx]
+  (js/console.log event)
+  (p/let [response (time (p/-> event
+                               (event->body-data)
+                               (->encrypted-response)))]
+    (if response
+      (clj->js {:statusCode 200
+                :body       (js/JSON.stringify (clj->js response))})
+      (clj->js {:statusCode 500}))))
 
 
 (def fake-json
@@ -58,7 +56,7 @@
   (clj->js (assoc {:requestContext {:httpMethod "POST"}} :body (js/JSON.stringify (clj->js fake-json)))))
 
 #_(p/let [x (handler fake-api-request "0")]
-  (println x))
+    (println x))
 
 
 
