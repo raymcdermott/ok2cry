@@ -43,8 +43,8 @@
              (.status 200)
              (.send result))))
 
-(defn -main
-  [_]
+(defn start-server
+  [port]
   (-> app
       (.use (milliparsec/json))
       (.use (logger/logger))
@@ -61,6 +61,10 @@
               (send-file res (.-path req))))
       (.post "/api/:path"
              (fn [req res] (call-handler req res)))
-      (.listen 3000
+      (.listen port
                (fn []
-                 (js/console.log "Listening on http://localhost:3000")))))
+                 (js/console.log "Listening on http://localhost:" port)))))
+
+(defn -main
+  [_]
+  (start-server 3000))
