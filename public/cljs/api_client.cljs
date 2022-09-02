@@ -1,31 +1,45 @@
 (ns api-client
   (:require [promesa.core :as p]
-            [reagent.core :as reagent]
+            [reagent.core :as r]
             [reagent.dom :as rdom]))
 
-(defonce state (reagent/atom (str (random-uuid))))
-
 (defn post-simple
-  []
+  [component-state]
   (-> (p/let [options (clj->js {:method  "POST"
                                 :headers {:Content-Type "application/json"}
                                 :body    (-> (clj->js {:id (str (random-uuid))})
                                              (js/JSON.stringify))})
               result (js/fetch "http://localhost:3000/api/simple" options)
               body (p/-> result .json .-body js/JSON.parse (js->clj :keywordize-keys true))]
-        (reset! state body))
+        (reset! component-state body))
       (p/catch (fn [error]
                  (js/console.log :error error)))))
 
 (defn message [txt]
   [:div (str "Result: " txt)])
 
-(defn my-component
+(defn fn-request1
   []
-  (let [{:keys [id]} @state]
-    [:div
-     [:p [:button {:on-click post-simple}
-          "Post a fn request"]]
-     [:div (str "Result: " id)]]))
+  (let [result (r/atom nil)]
+    (fn []
+      [:div
+       [:p [:button {:on-click #(post-simple result)}
+            "Post a fn-1 request"]]
+       [:div (str "Result: " (:id @result))]])))
 
-(rdom/render [my-component] (.getElementById js/document "app"))
+(defn fn-request2
+  []
+  (let [result (r/atom nil)]
+    (fn []
+      [:div
+       [:p [:button {:on-click #(post-simple result)}
+            "Post a fn-2 request"]]
+       [:div (str "Result: " (:id @result))]])))
+
+(defn home-page
+  []
+  [:div
+   [fn-request1]
+   [fn-request2]])
+
+(rdom/render [home-page] (.getElementById js/document "app"))
