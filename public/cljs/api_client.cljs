@@ -16,8 +16,8 @@
               body (p/-> result .json .-body js/JSON.parse (js->clj :keywordize-keys true))]
         (if unset-others
           (reset! state (hash-map tag body))
-          (swap! state (fn [m] (-> (assoc m tag body)
-                                   (#(apply dissoc % unset-tags)))))))
+          (swap! state (fn [m] (-> (apply dissoc m unset-tags)
+                                   (assoc tag body))))))
       (p/catch (fn [error]
                  (js/console.log :error error)))))
 
@@ -27,8 +27,8 @@
   [:div.col-xs-2
    [:p [:button.btn.btn-info
         {:on-click #(post-simple set-tag unset-tags unset-others)} label]]
-   (when-let [data (get @state set-tag)]
-     [:div (str "Result: " data)])])
+   (when-let [{:keys [id]} (get @state set-tag)]
+     [:div (str "Result: " id)])])
 
 (defn home-page
   []
