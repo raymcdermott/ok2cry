@@ -1,8 +1,6 @@
 (ns interactive.server.web
   (:require ["@tinyhttp/app" :as app]
             ["fs" :as fs]
-            [lambda.decry :as decry]
-            [lambda.encry :as encry]
             [lambda.simple :as simple]
             ["@tinyhttp/logger" :as logger]
             ["path" :as path]
@@ -36,8 +34,7 @@
           request-body (req->api-gateway-data req)
           result (condp = api
                    :simple (simple/handler request-body nil)
-                   :encrypt (encry/handler request-body nil)
-                   :decrypt (decry/handler request-body nil))]
+                   "Ooops")]
     (js/console.log "result" result)
          (-> res
              (.status 200)

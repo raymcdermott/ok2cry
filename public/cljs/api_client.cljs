@@ -1,45 +1,43 @@
 (ns api-client
-  (:require [promesa.core :as p]
-            [reagent.core :as r]
-            [reagent.dom :as rdom]))
+  (:require
+    [promesa.core :as p]
+    [reagent.core :as r]
+    [reagent.dom :as rdom]))
+
+(defonce state (r/atom nil))
 
 (defn post-simple
-  [component-state]
+  [tag unset-tags]
   (-> (p/let [options (clj->js {:method  "POST"
                                 :headers {:Content-Type "application/json"}
-                                :body    (-> (clj->js {:id (str (random-uuid))})
+                                :body    (-> (clj->js {:id (str (random-uuid) "-" (name tag))})
                                              (js/JSON.stringify))})
               result (js/fetch "http://localhost:3000/api/simple" options)
               body (p/-> result .json .-body js/JSON.parse (js->clj :keywordize-keys true))]
-        (reset! component-state body))
+        (swap! state (fn [m] (-> m
+                                 (assoc tag body)
+                                 (#(apply dissoc % unset-tags))))))
       (p/catch (fn [error]
                  (js/console.log :error error)))))
 
-(defn message [txt]
-  [:div (str "Result: " txt)])
-
-(defn fn-request1
-  []
-  (let [result (r/atom nil)]
-    (fn []
-      [:div
-       [:p [:button {:on-click #(post-simple result)}
-            "Post a fn-1 request"]]
-       [:div (str "Result: " (:id @result))]])))
-
-(defn fn-request2
-  []
-  (let [result (r/atom nil)]
-    (fn []
-      [:div
-       [:p [:button {:on-click #(post-simple result)}
-            "Post a fn-2 request"]]
-       [:div (str "Result: " (:id @result))]])))
+(defn fn-request
+  [label set-tag & {:keys [unset-tags]
+                    or    []}]
+  [:div.col-xs-2
+   [:p [:button.btn.btn-info
+        {:on-click #(post-simple set-tag unset-tags)} label]]
+   (when-let [data (get @state set-tag)]
+     [:div (str "Result: " data)])])
 
 (defn home-page
   []
-  [:div
-   [fn-request1]
-   [fn-request2]])
+  [:div.container
+   [:div.row
+    [:h1 "API Client"]]
+   [:div.row
+    [fn-request "Request Y" :tag-y]
+    [fn-request "Request Z" :tag-z :unset-tags [:tag-a]]
+    [fn-request "Request A" :tag-a :unset-tags [:tag-z :tag-b]]
+    [fn-request "Request B" :tag-b :unset-tags [:tag-a]]]])
 
 (rdom/render [home-page] (.getElementById js/document "app"))
