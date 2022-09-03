@@ -28,7 +28,7 @@
    [:button.btn.btn-info.btn-sm
     {:on-click #(post-simple set-tag unset-tags unset-others)} label]
    (when-let [{:keys [id]} (get @state set-tag)]
-     [:table.table.table-condensed
+     [:table.table.table-striped
       [:tbody
        [:tr [:td [:p.text-uppercase "Result data"]] [:td id]]
        [:tr [:td "Result"] [:td id]]
@@ -45,26 +45,33 @@
    [:div.row
     [:h2 "API Client " [:small "with features "]
      [:span.glyphicon.glyphicon-exclamation-sign]]]
+   [:div.row]
    [:div.row
     [:h3 "DB aspects " [:small "with some nice things "]
      [:span.glyphicon.glyphicon-remove-circle]]]
-   [:div.row
+   [:div.row]
+   [:div.row {:style {:height "50px"}}
     [fn-request "Request Y" :tag-y :unset-others true]
     [fn-request "Request A" :tag-a :unset-tags [:tag-z :tag-b]]
     [fn-request "Request B" :tag-b :unset-tags [:tag-a]]]
+   [:div.row]
    [:div.row
     [:h3 "API invocations " [:small "with affordances to boot "]
      [:span.glyphicon.glyphicon-user]]]
-   [:div.row
+   [:div.row]
+   [:div.row {:style {:height "50px"}}
     [fn-request "Request Y" :tag-y :unset-others true]
     [fn-request "Request A" :tag-a :unset-tags [:tag-z :tag-b]]
     [fn-request "Request B" :tag-b :unset-tags [:tag-a]]]
+   [:div.row]
    [:div.row
     [:h3 "Simulations " [:small "of things "]
      [:span.glyphicon.glyphicon-ok]]]
-   [:div.row
+   [:div.row]
+   [:div.row {:style {:height "50px"}}
     [fn-request "Request Y" :tag-y :unset-others true]
     [fn-request "Request A" :tag-a :unset-tags [:tag-z :tag-b]]
-    [fn-request "Request B" :tag-b :unset-tags [:tag-a]]]])
+    [fn-request "Request B" :tag-b :unset-tags [:tag-a]]]
+   [:br]])
 
 (rdom/render [home-page] (.getElementById js/document "app"))
