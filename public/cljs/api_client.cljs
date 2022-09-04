@@ -50,7 +50,7 @@
     [:h3 "DB aspects " [:small "with some nice things "]
      [:span.glyphicon.glyphicon-remove-circle]]]
    [:div.row]
-   [:div.row {:style {:height "50px"}}
+   [:div.row {:style {:height "150px"}}
     [fn-request "Request Y" :tag-y :unset-others true]
     [fn-request "Request A" :tag-a :unset-tags [:tag-z :tag-b]]
     [fn-request "Request B" :tag-b :unset-tags [:tag-a]]]
