@@ -1,8 +1,31 @@
-; This file is only here to assist with editor integration, specifically Cursive on IntelliJ IDEA
+{:paths ["jvm/src" "js/src"]
+ :aliases {:test {:extra-paths ["jvm/test"]
+                  :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
+                               io.github.cognitect-labs/test-runner
+                               {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+                  :main-opts ["-m" "cognitect.test-runner"]
+                  :dirs ["jvm/test"]
+                  :exec-fn cognitect.test-runner.api/test}
 
-; nbb DOES NOT USE THIS FILE - deps are built in (like promesa) or added via npm => package.json
+           ; activate the alias for editor integration
+           :clj {:extra-paths ["jvm/test"]
+                 :extra-deps {org.clojure/clojure {:mvn/version "1.11.1"}
+                              org.clojure/core.async {:mvn/version "1.5.648"}
+                              org.clojure/data.json {:mvn/version "2.4.0"}
+                              com.cognitect/transit-clj {:mvn/version "1.0.329"}
+                              org.bouncycastle/bcprov-jdk15on {:mvn/version "1.70"}
+                              ring/ring {:mvn/version "1.9.5"}}}
 
-{:paths ["src" "test"]
- :deps  {org.clojure/clojurescript {:mvn/version "1.11.60"}
-         funcool/promesa           {:mvn/version "8.0.450"}
-         reagent/reagent           {:mvn/version "1.1.0"}}}
+           ; NOTE: nbb DOES NOT USE THIS FILE - activate the alias for editor integration
+           ; - deps are built in (like promesa) or added via npm => package.json
+           :nbb {:extra-paths ["js/test"]
+                 :extra-deps {org.clojure/clojurescript {:mvn/version "1.11.60"}
+                              funcool/promesa {:mvn/version "8.0.450"}
+                              cljs-bean/cljs-bean {:mvn/version "1.9.0"}
+                              reagent/reagent {:mvn/version "1.1.0"}}}
+
+           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
+                      :main-opts ["-m" "antq.core"]}
+
+           :cljfmt {:extra-deps {cljfmt/cljfmt {:mvn/version "0.9.2"}}
+                    :main-opts ["-m" "cljfmt.main"]}}}

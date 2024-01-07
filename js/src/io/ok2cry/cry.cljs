@@ -3,16 +3,13 @@
     #?@(:org.babashka/nbb [["crypto" :as crypto]
                            ["buffer" :as buffer]]
         :cljs             [])
-    [clojure.string :as string]
     [clojure.edn :as edn]
-    [promesa.core :as p]
-    [clojure.string :as string]))
+    [clojure.string :as string]
+    [promesa.core :as p]))
 
-#?(:org.babashka/nbb
-   (def subtle (.. crypto -webcrypto -subtle))
-   :cljs
-   (def subtle js/crypto.subtle))
-
+(def subtle
+  #?(:org.babashka/nbb (.. crypto -webcrypto -subtle)
+     :cljs js/crypto.subtle))
 
 (defn verify
   [public-key signature data]
@@ -22,7 +19,6 @@
            signature
            data))
 
-
 (defn encrypt
   [crypto-key data]
   (.encrypt subtle
@@ -30,18 +26,15 @@
             crypto-key
             data))
 
-
 (defn string->encoded-data
   [string]
   (let [encoder (js/TextEncoder.)]                          ; Always UTF-8
     (.encode encoder string)))
 
-
 (defn encoded-data->string
   [data]
   (let [decoder (js/TextDecoder. "utf-8")]
     (.decode decoder data)))
-
 
 (defn string->array-buffer
   [s]
@@ -52,13 +45,11 @@
       (aset view index (.charCodeAt decoded index)))
     abuf))
 
-
 (defn array-buffer->hex
   [array-buffer]
   (->> (js/Array.from (js/Uint8Array. array-buffer))
        (map #(.padStart (.toString % 16) 2 "0"))
        (apply str)))
-
 
 (defn hex->array-buffer
   [hex]
@@ -70,14 +61,12 @@
       (aset view index (js/parseInt (nth hex-numbers index) 16)))
     abuf))
 
-
 (defn hex-string->edn
   [hex-string]
   (-> hex-string
-      (hex->array-buffer)
-      (encoded-data->string)
-      (edn/read-string)))
-
+      hex->array-buffer
+      encoded-data->string
+      edn/read-string))
 
 (defn to-hex
   [^js/Uint8Array array]
@@ -100,7 +89,6 @@
          (aset view index (.charCodeAt decoded index)))
        abuf)))
 
-
 (defn edn->hex-string
   [edn-data]
   (-> edn-data
@@ -118,7 +106,6 @@
                 (clj->js {:name "ECDSA" :namedCurve "P-384"})
                 false
                 #js ["verify"])))
-
 
 (defn import-crypto-key
   [key-str]

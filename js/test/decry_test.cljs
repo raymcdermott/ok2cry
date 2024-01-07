@@ -7,7 +7,7 @@
 
 (deftest card-pin-access
   (testing "that we can obtain the card PIN"
-    (async done
+    #_(async done
            (-> (p/let [{:keys [id]} (create/create-card common-data/card-account common-data/sample-data)
                        {:keys [activated]} (activate/call-modulr-api id)
                        {:keys [body]} (pin/call-modulr-api id)

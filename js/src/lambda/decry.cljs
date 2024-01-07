@@ -1,24 +1,21 @@
 (ns lambda.decry
   (:require
+    [clojure.edn :as edn]
     [clojure.string :as string]
+    [lambda.common :refer [respond]]
     [promesa.core :as p]))
-
 
 (def signing-key-params
   {:name "ECDSA" :namedCurve "P-384"})
 
-
 (def signing-params
   {:name "ECDSA" :hash {:name "SHA-384"}})
-
 
 (def encryption-key-params
   {:name "RSA-OAEP" :hash "SHA-384"})
 
-
 (def encryption-params
   {:name "RSA-OAEP"})
-
 
 (defn verify
   [public-key signature data]
@@ -28,7 +25,6 @@
     signature
     data))
 
-
 (defn encrypt
   [crypto-key data]
   (js/crypto.subtle.encrypt
@@ -36,28 +32,24 @@
     crypto-key
     data))
 
-
 (defn string->encoded-data
   [string]
   (let [encoder (js/TextEncoder.)]                          ; Always UTF-8
     (.encode encoder string)))
-
 
 (defn encoded-data->string
   [data]
   (let [decoder (js/TextDecoder. "utf-8")]
     (.decode decoder data)))
 
-
 (defn string->array-buffer
   [s]
   (let [decoded (.toString (js/Buffer.from s "base64") "binary")
-        abuf (js/ArrayBuffer. (count decoded))
-        view (js/Uint8Array. abuf)]
+        abuf    (js/ArrayBuffer. (count decoded))
+        view    (js/Uint8Array. abuf)]
     (doseq [index (range (count decoded))]
       (aset view index (.charCodeAt decoded index)))
     abuf))
-
 
 (defn array-buffer->hex
   [array-buffer]
@@ -65,25 +57,22 @@
        (map #(.padStart (.toString % 16) 2 "0"))
        (apply str)))
 
-
 (defn hex->array-buffer
   [hex]
-  (let [size (/ (count hex) 2)
-        abuf (js/ArrayBuffer. size)
-        view (js/Uint8Array. abuf)
+  (let [size        (/ (count hex) 2)
+        abuf        (js/ArrayBuffer. size)
+        view        (js/Uint8Array. abuf)
         hex-numbers (map string/join (partition 2 hex))]
     (doseq [index (range size)]
       (aset view index (js/parseInt (nth hex-numbers index) 16)))
     abuf))
-
 
 (defn hex-string->edn
   [hex-string]
   (-> hex-string
       (hex->array-buffer)
       (encoded-data->string)
-      (read-string)))
-
+      (edn/read-string)))
 
 (defn import-signing-key
   [key-str]
@@ -95,7 +84,6 @@
       false
       ["verify"])))
 
-
 (defn import-crypto-key
   [key-str]
   (let [key-arr (string->array-buffer key-str)]
@@ -106,7 +94,6 @@
       false
       ["encrypt"])))
 
-
 (defn obtain-secret-data
   [encryption-key]
   (p/let [pin-data (str (rand-nth (range 1337 7331)))]      ; fake API call
@@ -114,20 +101,18 @@
          (string->encoded-data)
          (encrypt encryption-key))))
 
-
 (defn ->encrypted-response
   [{:keys [signing-key encryption-key signature signed-property request-data] :as request}]
-  (p/let [t0 (js/Date.now)
-          signing-key' (import-signing-key signing-key)
+  (p/let [t0              (js/Date.now)
+          signing-key'    (import-signing-key signing-key)
           encryption-key' (import-crypto-key encryption-key)
-          signature' (hex->array-buffer signature)
-          request-data' (hex-string->edn request-data)
-          signed-data (request-data' (keyword signed-property))
-          verified? (verify signing-key' signature' (string->encoded-data signed-data))
-          encrypted-data (when verified? (obtain-secret-data encryption-key'))]
+          signature'      (hex->array-buffer signature)
+          request-data'   (hex-string->edn request-data)
+          signed-data     (request-data' (keyword signed-property))
+          verified?       (verify signing-key' signature' (string->encoded-data signed-data))
+          encrypted-data  (when verified? (obtain-secret-data encryption-key'))]
     (when encrypted-data
       {:pin (array-buffer->hex encrypted-data)})))
-
 
 (defn parse-event
   [event]
@@ -136,20 +121,15 @@
       (-> clj-event (get :body) (js/JSON.parse) (js->clj :keywordize-keys true))
       clj-event)))
 
-
 (defn handler
   [event _ctx]
-  (js/console.log event)
-  (p/let [time-start (js/Date.now)
-          response (-> event
-                       (parse-event)
-                       (->encrypted-response))]
-    (js/console.log "Elapsed: " (- (js/Date.now) time-start) "ms")
-    (if response
-      (clj->js {:statusCode 200
-                :body       (js/JSON.stringify (clj->js response))})
-      (clj->js {:statusCode 500}))))
+  (p/-> event
+        parse-event
+        ->encrypted-response
+        respond))
 
+;; expose the Lambda for access in the ES Module (see decry.mjs at the root of the project)
+#js {:handler handler}
 
 (comment
 
@@ -168,7 +148,3 @@
   (handler fake-api-request "1")
 
   )
-
-
-;; exports
-#js {:handler handler}
