@@ -21,13 +21,13 @@ Yes, yes you do. And it's great. And in many cases it's good enough. You can mov
 
 ### Er, OK ... just before I leave, quick follow up. When isn't TLS good enough?
 It's not great for every situation. Here are a few examples:
-- did we say it's end-to-end
-  - it's end-to-end. Probably for that.
+- did we say it's end-to-end, beyond IP endpoints
+  - it's end-to-end, beyond IP endpoints. Probably for that.
 - organisation constraints
-  - you don't have any cryptography in the organisation, but you want to protect specific messages in a way that's simple and does not impose a management burden.
-  - you do have encryption but there is a lot of overhead in getting it set-up, and you only want it for a few specific cases. Or, more likely, just one.
+  - you don't have any managed cryptography capabilities in the organisation, but you want to protect specific messages in a way that's simple and does not impose a management or operational burden.
+  - you do have managed cryptography capabilities but there is a lot of overhead in getting it set-up, and you only want it for a few specific cases. Or, more likely, just one.
 - as an add-on to your identity system
-  - your users get logged in but your identity system doesn't do encryption. Few of them do. Even fewer offer end-to-end encryption.
+  - your users get logged in but your identity system doesn't do encryption. Few of them do. Even fewer offer end-to-end encryption for messages.
 - you want to protect data after it exits TLS but before it hits your service. 
   - you can't risk having that data written into logs
   - you don't want anyone except the person entering the data and your service accessing the data ie it's end-to-end. Yes this is the same as the first point but more words can help. And repetition is soothing.
@@ -45,10 +45,10 @@ Ah, no. Definitely not. And that's why you can't use it for everything, everywhe
 
 You should know that PKI based identity platforms don't give you a perfect, admin free version of secrecy either. There is always a key to protect, manage and share. Or a set of keys. If it's done well, you will hardly notice it, but it's there. The burden is always there. And it's fine. Usually.
 
-You can use it as a value add to your identity system though. More on how to integrate with OIDC based systems [is here ... link tbc]
+You can use it as a value add to your identity system though. More on how to integrate with OIDC / OAuth systems [is here ... link tbc]
 
 ### Hang on though, don't you use keys. I'm getting a headache. Maybe I do want to cry.
-It's ok2cry. It really is. I encourage it.
+It's ok2cry. It really is. We encourage it.
 Maybe you missed the **disposable** part of the explanation at the beginning? It was a while ago. It's so good that you came this far.
 
 ok2cry is a way to use cryptography for just one message at a time. Nothing about these keys is tied to your identity. Every key lasts for the duration of the message exchange and then its thrown away. Whoosh, and it's gone. 
@@ -62,7 +62,7 @@ This is not bitcon mining. It's very efficient to produce keys. The most commonl
 
 ## OK, let's see how it works
 Here are two examples:
-- **client initiated**: a browser-based Single Page Application can give the server a key so that it, and only it, can read a message encrypted with the key and returned by the server.
+- **client initiated**: a browser-based Single Page Application can give the server a public key so that it, and only it, can read a message encrypted with the key and returned by the server.
 - **server initiated**: a server gives a public key so that it, and only it, can ever read a message encrypted with the key by the client.
 
 ### Client produces temporary key
@@ -102,15 +102,56 @@ Time->>Storage: Key deleted after N seconds
 
 More examples and documentation notes are in the [Server key documentation](docs/server-key.md).
 
+## What contexts work well?
 
-What contexts work well?
+Message Secrecy
 
-Secrecy
+Strict Confidentiality to a single user
 
-Confidentiality
+Proofs (as an add-on)
 
-Proofs
+Identity (as an add-on)
 
-Identity
+# Development - JVM and JS
 
+## JVM Development
 
+### Pre-requisites
+Java 11+ (tested with 17 and 21)
+
+Clojure
+
+### CLI driven tests
+
+```shell
+clj -X:clj:test :dirs '["jvm/test"]'
+```
+
+## JS Development - Browser / NodeJS
+
+### Pre-requisites
+NodeJS 16+
+
+### Install dependencies
+
+```shell
+npm install
+```
+
+### CLI driven tests
+
+```shell
+nbb -cp js/src:js/test -m nextjournal.test-runner -d js/test
+```
+
+## UI driven tests
+
+### Start the web server
+
+```shell
+nbb -cp src:test -m interactive.server.web
+```
+
+### Point your browser
+
+At http://localhost:3000 
