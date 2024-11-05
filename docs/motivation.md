@@ -51,6 +51,7 @@ The Third Party service usually has several clients and would prefer a standard 
 
 ## Practical solution
 
+```mermaid
 sequenceDiagram
 User->>CLJS SPA: Clicks "Fetch Secret"
 CLJS SPA->>ok2cry: updatePayload
@@ -77,9 +78,11 @@ CLJS SPA->>ok2cry: decrpytPayload
 ok2cry->>ok2cry: Destroy Key Pair
 ok2cry->>CLJS SPA: plain text payload
 CLJS SPA->>User: Show secret
+```
 
+The service uses ok2cry which has tested the key combinations between servers and clients.
 
-
+The process for encryption and decryption is based on standards.
 
 
 
