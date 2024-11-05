@@ -16,7 +16,9 @@ CLJS SPA->>User: Show secret
 
 ## Security Problem
 
-The S E C R E T is visible on the server. Trust is required between the two parties.
+The S E C R E T is visible on the server and can be leaked directly of via logs. 
+
+High trust is required between the two parties.
 
 ## Conceptual Security Solution
 
