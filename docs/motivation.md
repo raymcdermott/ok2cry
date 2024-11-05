@@ -51,6 +51,34 @@ The Third Party service usually has several clients and would prefer a standard 
 
 ## Practical solution
 
+sequenceDiagram
+User->>CLJS SPA: Clicks "Fetch Secret"
+CLJS SPA->>ok2cry: updatePayload
+ok2cry->>ok2cry: Create Key Pair
+ok2cry->>CLJS SPA: payload and Public Key
+CLJS SPA->>CLJ Service: Send Request with Public Key
+rect rgb(0, 155, 0)
+Note left of CLJ Service: TLS
+end
+rect rgb(0, 155, 0)
+Note right of CLJ Service: TLS
+end
+CLJ Service->>Third-Party-REST-API: Request Secret with Public Key
+Third-Party-REST-API->>Third-Party-REST-API: Obtain / generate<br>confidential data
+Third-Party-REST-API->>ok2cry-lib: Encrypt data with Public Key
+ok2cry-lib->>Third-Party-REST-API: ENCRYPTED DATA
+rect rgb(0, 155, 0)
+Third-Party-REST-API->>CLJ Service: ENCRYPTED-RESPONSE
+end
+rect rgb(0, 155, 0)
+CLJ Service->>CLJS SPA: ENCRYPTED-RESPONSE
+end
+CLJS SPA->>ok2cry: decrpytPayload
+ok2cry->>ok2cry: Destroy Key Pair
+ok2cry->>CLJS SPA: plain text payload
+CLJS SPA->>User: Show secret
+
+
 
 
 
